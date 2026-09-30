@@ -1,0 +1,1801 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>预制菜认知实验</title>
+
+    <style>
+
+        /* =========================
+           基础页面
+        ========================= */
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, "Microsoft YaHei", sans-serif;
+            background: #f5f5f2;
+            color: #222;
+        }
+
+        .page {
+            width: 100%;
+            min-height: 100vh;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 0;
+        }
+
+        .page.active {
+            display: flex;
+        }
+
+        .container {
+            width: 820px;
+            max-width: 90%;
+            background: white;
+            padding: 50px;
+        }
+
+        h1 {
+            font-size: 32px;
+            margin: 0 0 20px;
+        }
+
+        h2 {
+            font-size: 25px;
+            line-height: 1.5;
+            margin: 10px 0 15px;
+        }
+
+        p {
+            line-height: 1.8;
+        }
+
+        .question-number {
+            font-size: 13px;
+            letter-spacing: 2px;
+            color: #777;
+            margin-bottom: 10px;
+        }
+
+        .description {
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+
+        /* =========================
+           按钮
+        ========================= */
+
+        button {
+            margin-top: 30px;
+            padding: 13px 30px;
+            border: none;
+            background: #222;
+            color: white;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        button:hover {
+            opacity: 0.8;
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+
+        /* =========================
+           普通选项
+        ========================= */
+
+        .options {
+            margin-top: 25px;
+        }
+
+        .option {
+            border: 1px solid #ccc;
+            padding: 16px 18px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: 0.2s;
+            background: white;
+        }
+
+        .option:hover {
+            background: #f5f5f5;
+        }
+
+        .option.selected {
+            background: #222;
+            color: white;
+            border-color: #222;
+        }
+
+        .hint {
+            font-size: 13px;
+            color: #888;
+            margin-top: 18px;
+        }
+
+
+        /* =========================
+           提示框
+        ========================= */
+
+        .instruction-box {
+            background: #f5f5f2;
+            padding: 18px;
+            margin: 20px 0 30px;
+            line-height: 1.7;
+        }
+
+
+        /* =========================
+           小游戏1：预制菜的一生
+        ========================= */
+
+        .cards-title {
+            font-size: 14px;
+            color: #777;
+            margin-bottom: 12px;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 35px;
+        }
+
+        .process-card {
+            border: 1px solid #bbb;
+            background: white;
+            padding: 18px 10px;
+            text-align: center;
+            cursor: grab;
+            user-select: none;
+        }
+
+        .process-card:hover {
+            background: #f5f5f5;
+        }
+
+        .process-card.used {
+            opacity: 0.3;
+            cursor: default;
+        }
+
+        .process-card.dragging {
+            opacity: 0.4;
+        }
+
+        .slots-title {
+            font-size: 14px;
+            color: #777;
+            margin-bottom: 12px;
+        }
+
+        .slots {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+        }
+
+        .slot {
+            min-height: 100px;
+            border: 1px dashed #aaa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 8px;
+            font-size: 14px;
+            background: #fafafa;
+        }
+
+        .slot.filled {
+            border: 1px solid #222;
+            background: #222;
+            color: white;
+        }
+
+
+        /* =========================
+           小游戏2：拼出一份预制菜
+        ========================= */
+
+        .food-board {
+            position: relative;
+            width: 100%;
+            height: 480px;
+            background: #f3f3ef;
+            border: 1px solid #ddd;
+            margin-top: 25px;
+            overflow: hidden;
+        }
+
+        .food-center {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+
+            transform: translate(-50%, -50%);
+
+            width: 150px;
+            height: 100px;
+
+            border: 2px solid #222;
+            background: white;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            text-align: center;
+
+            z-index: 2;
+        }
+
+        .related-item {
+            position: absolute;
+
+            padding: 10px 14px;
+
+            border: 1px solid #aaa;
+            background: white;
+
+            cursor: pointer;
+
+            font-size: 14px;
+
+            transition: 0.2s;
+        }
+
+        .related-item:hover {
+            transform: scale(1.04);
+        }
+
+        .related-item.selected {
+            background: #222;
+            color: white;
+            border-color: #222;
+        }
+
+        .item-1 {
+            left: 7%;
+            top: 10%;
+        }
+
+        .item-2 {
+            left: 39%;
+            top: 7%;
+        }
+
+        .item-3 {
+            right: 7%;
+            top: 12%;
+        }
+
+        .item-4 {
+            left: 5%;
+            top: 38%;
+        }
+
+        .item-5 {
+            right: 5%;
+            top: 40%;
+        }
+
+        .item-6 {
+            left: 8%;
+            bottom: 12%;
+        }
+
+        .item-7 {
+            left: 38%;
+            bottom: 8%;
+        }
+
+        .item-8 {
+            right: 7%;
+            bottom: 12%;
+        }
+
+        .item-9 {
+            left: 20%;
+            top: 27%;
+        }
+
+        .item-10 {
+            right: 20%;
+            top: 27%;
+        }
+
+        .item-11 {
+            left: 20%;
+            bottom: 25%;
+        }
+
+        .item-12 {
+            right: 20%;
+            bottom: 25%;
+        }
+
+
+        /* =========================
+           小游戏3：消失时间
+        ========================= */
+
+        .time-items {
+            margin-top: 25px;
+        }
+
+        .time-item {
+            border-bottom: 1px solid #ddd;
+            padding: 22px 0;
+        }
+
+        .time-item-name {
+            font-size: 17px;
+            margin-bottom: 15px;
+        }
+
+        .range-row {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        input[type="range"] {
+            flex: 1;
+            cursor: pointer;
+        }
+
+        .range-value {
+            width: 75px;
+            text-align: center;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .range-labels {
+            display: flex;
+            justify-content: space-between;
+
+            font-size: 11px;
+            color: #999;
+
+            margin-top: 7px;
+        }
+
+
+        /* =========================
+           Q3
+        ========================= */
+
+        .q3-options {
+            margin-top: 25px;
+        }
+
+        .q3-option {
+            border: 1px solid #ccc;
+            padding: 17px;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+
+        .q3-option.selected {
+            background: #222;
+            color: white;
+            border-color: #222;
+        }
+
+
+        /* =========================
+           完成页面
+        ========================= */
+
+        .complete-message {
+            text-align: center;
+        }
+
+        .complete-message h1 {
+            margin-bottom: 20px;
+        }
+
+    </style>
+</head>
+
+
+<body>
+
+
+<!-- =========================
+     开始页面
+========================= -->
+
+<div class="page active" id="startPage">
+
+    <div class="container">
+
+        <h1>一份预制菜，结束了吗？</h1>
+
+        <p>
+            这是一个关于日常生活与预制菜的认知实验。
+        </p>
+
+        <p>
+            接下来你会通过几个简单的问题和小游戏，
+            回答你对预制菜的第一反应。
+        </p>
+
+        <p>
+            没有标准答案，请按照你的第一反应进行选择。
+        </p>
+
+        <button onclick="startExperiment()">
+            开始实验
+        </button>
+
+    </div>
+
+</div>
+
+
+
+<!-- =========================
+     Q1
+========================= -->
+
+<div class="page" id="q1Page">
+
+    <div class="container">
+
+        <div class="question-number">
+            QUESTION 01
+        </div>
+
+        <h2>
+            当你想到“预制菜”时，
+            你首先会想到哪些问题？
+        </h2>
+
+        <p class="description">
+            请选择所有符合你第一反应的选项。
+        </p>
+
+
+        <div class="options">
+
+            <div class="option"
+                 onclick="selectQ1(this, '食品安全')">
+                食品安全
+            </div>
+
+            <div class="option"
+                 onclick="selectQ1(this, '营养健康')">
+                营养健康
+            </div>
+
+            <div class="option"
+                 onclick="selectQ1(this, '味道 / 口感')">
+                味道 / 口感
+            </div>
+
+            <div class="option"
+                 onclick="selectQ1(this, '价格')">
+                价格
+            </div>
+
+            <div class="option"
+                 onclick="selectQ1(this, '方便 / 节省时间')">
+                方便 / 节省时间
+            </div>
+
+            <div class="option"
+                 onclick="selectQ1(this, '包装')">
+                包装
+            </div>
+
+            <div class="option"
+                 onclick="selectQ1(this, '运输')">
+                运输
+            </div>
+
+            <div class="option"
+                 onclick="selectQ1(this, '冷藏 / 冷冻')">
+                冷藏 / 冷冻
+            </div>
+
+            <div class="option"
+                 onclick="selectQ1(this, '食品添加剂')">
+                食品添加剂
+            </div>
+
+            <div class="option"
+                 onclick="selectQ1(this, '环境影响')">
+                环境影响
+            </div>
+
+            <div class="option"
+                 onclick="selectQ1(this, '其他')">
+                其他
+            </div>
+
+        </div>
+
+
+        <p class="hint">
+            可以选择多个选项。
+        </p>
+
+
+        <button onclick="nextFromQ1()">
+            下一题
+        </button>
+
+    </div>
+
+</div>
+
+
+
+<!-- =========================
+     Q2
+========================= -->
+
+<div class="page" id="q2Page">
+
+    <div class="container">
+
+        <div class="question-number">
+            QUESTION 02
+        </div>
+
+        <h2>
+            如果只考虑日常生活，
+            你觉得预制菜会对哪些东西产生影响？
+        </h2>
+
+        <p class="description">
+            请选择所有符合你想法的选项。
+        </p>
+
+
+        <div class="options">
+
+            <div class="option"
+                 onclick="selectQ2(this, '我的时间')">
+                我的时间
+            </div>
+
+            <div class="option"
+                 onclick="selectQ2(this, '家庭生活')">
+                家庭生活
+            </div>
+
+            <div class="option"
+                 onclick="selectQ2(this, '厨房')">
+                厨房
+            </div>
+
+            <div class="option"
+                 onclick="selectQ2(this, '垃圾')">
+                垃圾
+            </div>
+
+            <div class="option"
+                 onclick="selectQ2(this, '能源')">
+                能源
+            </div>
+
+            <div class="option"
+                 onclick="selectQ2(this, '环境')">
+                环境
+            </div>
+
+            <div class="option"
+                 onclick="selectQ2(this, '食品价格')">
+                食品价格
+            </div>
+
+            <div class="option"
+                 onclick="selectQ2(this, '未来生活')">
+                未来生活
+            </div>
+
+        </div>
+
+
+        <p class="hint">
+            可以选择多个选项。
+        </p>
+
+
+        <button onclick="nextFromQ2()">
+            下一题
+        </button>
+
+    </div>
+
+</div>
+
+
+
+<!-- =========================
+     小游戏1：预制菜的一生
+========================= -->
+
+<div class="page" id="game1Page">
+
+    <div class="container">
+
+        <div class="question-number">
+            GAME 01
+        </div>
+
+        <h2>
+            预制菜的一生
+        </h2>
+
+        <p class="description">
+            如果一份预制菜从生产到最后被你吃掉，
+            你认为它会经历哪些过程？
+        </p>
+
+
+        <div class="instruction-box">
+
+            下面有 9 张卡片。<br>
+
+            <strong>
+                请从中选择 5 张，并按照你认为发生的顺序排列。
+            </strong>
+
+            <br>
+
+            没有标准答案，请按照你的第一反应进行。
+
+        </div>
+
+
+        <div class="cards-title">
+            可选择的环节
+        </div>
+
+
+        <div class="cards" id="processCards">
+
+            <div class="process-card"
+                 draggable="true"
+                 data-value="原料采购">
+                原料采购
+            </div>
+
+            <div class="process-card"
+                 draggable="true"
+                 data-value="食材加工">
+                食材加工
+            </div>
+
+            <div class="process-card"
+                 draggable="true"
+                 data-value="烹饪 / 熟制">
+                烹饪 / 熟制
+            </div>
+
+            <div class="process-card"
+                 draggable="true"
+                 data-value="包装">
+                包装
+            </div>
+
+            <div class="process-card"
+                 draggable="true"
+                 data-value="冷藏 / 冷冻">
+                冷藏 / 冷冻
+            </div>
+
+            <div class="process-card"
+                 draggable="true"
+                 data-value="运输">
+                运输
+            </div>
+
+            <div class="process-card"
+                 draggable="true"
+                 data-value="仓储 / 销售">
+                仓储 / 销售
+            </div>
+
+            <div class="process-card"
+                 draggable="true"
+                 data-value="家庭储存">
+                家庭储存
+            </div>
+
+            <div class="process-card"
+                 draggable="true"
+                 data-value="家庭加热">
+                家庭加热
+            </div>
+
+        </div>
+
+
+        <div class="slots-title">
+            你的流程
+        </div>
+
+
+        <div class="slots">
+
+            <div class="slot" data-slot="0">
+                ①
+            </div>
+
+            <div class="slot" data-slot="1">
+                ②
+            </div>
+
+            <div class="slot" data-slot="2">
+                ③
+            </div>
+
+            <div class="slot" data-slot="3">
+                ④
+            </div>
+
+            <div class="slot" data-slot="4">
+                ⑤
+            </div>
+
+        </div>
+
+
+        <button onclick="finishGame1()">
+            完成
+        </button>
+
+    </div>
+
+</div>
+
+
+
+<!-- =========================
+     小游戏2：拼出一份预制菜
+========================= -->
+
+<div class="page" id="game2Page">
+
+    <div class="container">
+
+        <div class="question-number">
+            GAME 02
+        </div>
+
+        <h2>
+            拼出一份预制菜
+        </h2>
+
+        <p class="description">
+            想象屏幕中央有一份预制菜。
+            你认为哪些东西与它有关？
+        </p>
+
+
+        <div class="instruction-box">
+            点击你认为与这份预制菜有关的东西。
+            没有标准答案。
+        </div>
+
+
+        <div class="food-board">
+
+            <div class="food-center">
+                一份<br>
+                预制菜
+            </div>
+
+
+            <div class="related-item item-1"
+                 onclick="toggleRelated(this, '食材')">
+                食材
+            </div>
+
+            <div class="related-item item-2"
+                 onclick="toggleRelated(this, '工厂')">
+                工厂
+            </div>
+
+            <div class="related-item item-3"
+                 onclick="toggleRelated(this, '包装')">
+                包装
+            </div>
+
+            <div class="related-item item-4"
+                 onclick="toggleRelated(this, '冷库')">
+                冷库
+            </div>
+
+            <div class="related-item item-5"
+                 onclick="toggleRelated(this, '货车')">
+                货车
+            </div>
+
+            <div class="related-item item-6"
+                 onclick="toggleRelated(this, '超市')">
+                超市
+            </div>
+
+            <div class="related-item item-7"
+                 onclick="toggleRelated(this, '冰箱')">
+                冰箱
+            </div>
+
+            <div class="related-item item-8"
+                 onclick="toggleRelated(this, '微波炉')">
+                微波炉
+            </div>
+
+            <div class="related-item item-9"
+                 onclick="toggleRelated(this, '垃圾桶')">
+                垃圾桶
+            </div>
+
+            <div class="related-item item-10"
+                 onclick="toggleRelated(this, '能源')">
+                能源
+            </div>
+
+            <div class="related-item item-11"
+                 onclick="toggleRelated(this, '塑料')">
+                塑料
+            </div>
+
+            <div class="related-item item-12"
+                 onclick="toggleRelated(this, '厨师')">
+                厨师
+            </div>
+
+        </div>
+
+
+        <button onclick="finishGame2()">
+            完成
+        </button>
+
+    </div>
+
+</div>
+
+
+
+<!-- =========================
+     小游戏3：它什么时候才真正消失？
+========================= -->
+
+<div class="page" id="game3Page">
+
+    <div class="container">
+
+        <div class="question-number">
+            GAME 03
+        </div>
+
+        <h2>
+            它什么时候才真正消失？
+        </h2>
+
+        <p class="description">
+            从日常生活的角度看，
+            你觉得这些东西需要多久才会“消失”？
+        </p>
+
+
+        <div class="instruction-box">
+            拖动每一条进度条，
+            选择你认为它消失所需要的时间。
+        </div>
+
+
+        <div class="time-items">
+
+
+            <!-- 食品包装 -->
+
+            <div class="time-item">
+
+                <div class="time-item-name">
+                    食品包装
+                </div>
+
+                <div class="range-row">
+
+                    <input
+                        type="range"
+                        min="0"
+                        max="6"
+                        value="3"
+                        step="1"
+                        oninput="updateTime(this, 'timePackaging')"
+                    >
+
+                    <div
+                        class="range-value"
+                        id="timePackaging">
+                        请选择
+                    </div>
+
+                </div>
+
+                <div class="range-labels">
+                    <span>1天</span>
+                    <span>1个月</span>
+                    <span>1年</span>
+                    <span>10年</span>
+                    <span>50年</span>
+                    <span>100年</span>
+                    <span>更久</span>
+                </div>
+
+            </div>
+
+
+            <!-- 塑料膜 -->
+
+            <div class="time-item">
+
+                <div class="time-item-name">
+                    塑料膜
+                </div>
+
+                <div class="range-row">
+
+                    <input
+                        type="range"
+                        min="0"
+                        max="6"
+                        value="3"
+                        step="1"
+                        oninput="updateTime(this, 'timePlastic')"
+                    >
+
+                    <div
+                        class="range-value"
+                        id="timePlastic">
+                        请选择
+                    </div>
+
+                </div>
+
+                <div class="range-labels">
+                    <span>1天</span>
+                    <span>1个月</span>
+                    <span>1年</span>
+                    <span>10年</span>
+                    <span>50年</span>
+                    <span>100年</span>
+                    <span>更久</span>
+                </div>
+
+            </div>
+
+
+            <!-- 纸盒 -->
+
+            <div class="time-item">
+
+                <div class="time-item-name">
+                    纸盒
+                </div>
+
+                <div class="range-row">
+
+                    <input
+                        type="range"
+                        min="0"
+                        max="6"
+                        value="3"
+                        step="1"
+                        oninput="updateTime(this, 'timePaper')"
+                    >
+
+                    <div
+                        class="range-value"
+                        id="timePaper">
+                        请选择
+                    </div>
+
+                </div>
+
+                <div class="range-labels">
+                    <span>1天</span>
+                    <span>1个月</span>
+                    <span>1年</span>
+                    <span>10年</span>
+                    <span>50年</span>
+                    <span>100年</span>
+                    <span>更久</span>
+                </div>
+
+            </div>
+
+
+            <!-- 铝箔 -->
+
+            <div class="time-item">
+
+                <div class="time-item-name">
+                    铝箔
+                </div>
+
+                <div class="range-row">
+
+                    <input
+                        type="range"
+                        min="0"
+                        max="6"
+                        value="3"
+                        step="1"
+                        oninput="updateTime(this, 'timeAluminum')"
+                    >
+
+                    <div
+                        class="range-value"
+                        id="timeAluminum">
+                        请选择
+                    </div>
+
+                </div>
+
+                <div class="range-labels">
+                    <span>1天</span>
+                    <span>1个月</span>
+                    <span>1年</span>
+                    <span>10年</span>
+                    <span>50年</span>
+                    <span>100年</span>
+                    <span>更久</span>
+                </div>
+
+            </div>
+
+
+            <!-- 食物残渣 -->
+
+            <div class="time-item">
+
+                <div class="time-item-name">
+                    食物残渣
+                </div>
+
+                <div class="range-row">
+
+                    <input
+                        type="range"
+                        min="0"
+                        max="6"
+                        value="3"
+                        step="1"
+                        oninput="updateTime(this, 'timeFood')"
+                    >
+
+                    <div
+                        class="range-value"
+                        id="timeFood">
+                        请选择
+                    </div>
+
+                </div>
+
+                <div class="range-labels">
+                    <span>1天</span>
+                    <span>1个月</span>
+                    <span>1年</span>
+                    <span>10年</span>
+                    <span>50年</span>
+                    <span>100年</span>
+                    <span>更久</span>
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <button onclick="finishGame3()">
+            完成
+        </button>
+
+    </div>
+
+</div>
+
+
+
+<!-- =========================
+     Q3
+========================= -->
+
+<div class="page" id="q3Page">
+
+    <div class="container">
+
+        <div class="question-number">
+            QUESTION 03
+        </div>
+
+        <h2>
+            你认为未来哪些东西会受到预制菜的影响？
+        </h2>
+
+        <p class="description">
+            请选出你认为影响最强的 3 个。
+        </p>
+
+
+        <div class="q3-options">
+
+            <div class="q3-option"
+                 onclick="selectQ3(this, '家庭')">
+                家庭
+            </div>
+
+            <div class="q3-option"
+                 onclick="selectQ3(this, '能源')">
+                能源
+            </div>
+
+            <div class="q3-option"
+                 onclick="selectQ3(this, '垃圾')">
+                垃圾
+            </div>
+
+            <div class="q3-option"
+                 onclick="selectQ3(this, '土地')">
+                土地
+            </div>
+
+            <div class="q3-option"
+                 onclick="selectQ3(this, '水')">
+                水
+            </div>
+
+            <div class="q3-option"
+                 onclick="selectQ3(this, '空气')">
+                空气
+            </div>
+
+            <div class="q3-option"
+                 onclick="selectQ3(this, '植物')">
+                植物
+            </div>
+
+        </div>
+
+
+        <p class="hint">
+            已选择
+            <span id="q3Count">0</span>
+            / 3
+        </p>
+
+
+        <button
+            id="q3Button"
+            onclick="finishQ3()"
+            disabled>
+            完成
+        </button>
+
+    </div>
+
+</div>
+
+
+
+<!-- =========================
+     完成页面
+========================= -->
+
+<div id="completePage" class="page">
+
+    <h2>感谢你的参与</h2>
+
+    <p>
+        本次实验到此结束。
+    </p>
+
+    <p>
+        感谢你认真完成每一个问题与小游戏。
+    </p>
+
+</div>
+
+</div>
+
+
+
+<script>
+
+
+/* =====================================================
+   实验数据
+===================================================== */
+
+const experimentData = {
+
+    Q1: [],
+
+    Q2: [],
+
+    game1_selected: [],
+
+    game1_order: [],
+
+    game2_related: [],
+
+    game3_disappearTime: {},
+
+    Q3: []
+
+};
+
+
+
+/* =====================================================
+   页面切换
+===================================================== */
+
+function showPage(pageId) {
+
+    const pages =
+        document.querySelectorAll(".page");
+
+    pages.forEach(page => {
+
+        page.classList.remove("active");
+
+    });
+
+    document
+        .getElementById(pageId)
+        .classList.add("active");
+
+    window.scrollTo(0, 0);
+
+}
+
+
+
+/* =====================================================
+   开始实验
+===================================================== */
+
+function startExperiment() {
+
+    showPage("q1Page");
+
+}
+
+
+
+/* =====================================================
+   Q1
+===================================================== */
+
+function selectQ1(element, value) {
+
+    element.classList.toggle("selected");
+
+
+    if (element.classList.contains("selected")) {
+
+        experimentData.Q1.push(value);
+
+    }
+
+    else {
+
+        experimentData.Q1 =
+            experimentData.Q1.filter(
+                item => item !== value
+            );
+
+    }
+
+}
+
+
+
+function nextFromQ1() {
+
+    if (experimentData.Q1.length === 0) {
+
+        alert("请至少选择一个选项。");
+
+        return;
+
+    }
+
+    showPage("q2Page");
+
+}
+
+
+
+/* =====================================================
+   Q2
+===================================================== */
+
+function selectQ2(element, value) {
+
+    element.classList.toggle("selected");
+
+
+    if (element.classList.contains("selected")) {
+
+        experimentData.Q2.push(value);
+
+    }
+
+    else {
+
+        experimentData.Q2 =
+            experimentData.Q2.filter(
+                item => item !== value
+            );
+
+    }
+
+}
+
+
+
+function nextFromQ2() {
+
+    if (experimentData.Q2.length === 0) {
+
+        alert("请至少选择一个选项。");
+
+        return;
+
+    }
+
+    showPage("game1Page");
+
+}
+
+
+
+/* =====================================================
+   小游戏1
+   预制菜的一生
+===================================================== */
+
+let draggedCard = null;
+
+
+
+/* 拖动卡片 */
+
+document
+    .querySelectorAll(".process-card")
+    .forEach(card => {
+
+        card.addEventListener(
+            "dragstart",
+            function () {
+
+                draggedCard = this;
+
+                this.classList.add("dragging");
+
+            }
+        );
+
+
+        card.addEventListener(
+            "dragend",
+            function () {
+
+                this.classList.remove("dragging");
+
+            }
+        );
+
+    });
+
+
+
+/* 放入排序位置 */
+
+document
+    .querySelectorAll(".slot")
+    .forEach(slot => {
+
+        slot.addEventListener(
+            "dragover",
+            function (event) {
+
+                event.preventDefault();
+
+            }
+        );
+
+
+        slot.addEventListener(
+            "drop",
+            function (event) {
+
+                event.preventDefault();
+
+
+                if (!draggedCard) {
+                    return;
+                }
+
+
+                if (this.dataset.value) {
+                    return;
+                }
+
+
+                const filledSlots =
+                    document
+                    .querySelectorAll(
+                        ".slot.filled"
+                    )
+                    .length;
+
+
+                if (filledSlots >= 5) {
+                    return;
+                }
+
+
+                const value =
+                    draggedCard.dataset.value;
+
+
+                this.dataset.value =
+                    value;
+
+
+                this.innerHTML =
+                    "<div>" + value + "</div>";
+
+
+                this.classList.add("filled");
+
+
+                draggedCard.classList.add("used");
+
+
+                draggedCard.setAttribute(
+                    "draggable",
+                    "false"
+                );
+
+            }
+        );
+
+    });
+
+
+
+function finishGame1() {
+
+    const slots =
+        document.querySelectorAll(".slot");
+
+
+    const order = [];
+
+
+    slots.forEach(slot => {
+
+        if (slot.dataset.value) {
+
+            order.push(
+                slot.dataset.value
+            );
+
+        }
+
+    });
+
+
+    if (order.length !== 5) {
+
+        alert(
+            "请先选择 5 个环节，并完成排序。"
+        );
+
+        return;
+
+    }
+
+
+    experimentData.game1_order =
+        order;
+
+
+    experimentData.game1_selected =
+        [...order];
+
+
+    showPage("game2Page");
+
+}
+
+
+
+/* =====================================================
+   小游戏2
+   拼出一份预制菜
+===================================================== */
+
+function toggleRelated(element, value) {
+
+    element.classList.toggle("selected");
+
+
+    if (element.classList.contains("selected")) {
+
+        experimentData.game2_related.push(value);
+
+    }
+
+    else {
+
+        experimentData.game2_related =
+            experimentData.game2_related.filter(
+                item => item !== value
+            );
+
+    }
+
+}
+
+
+
+function finishGame2() {
+
+    if (
+        experimentData.game2_related.length === 0
+    ) {
+
+        alert(
+            "请至少选择一个你认为有关的东西。"
+        );
+
+        return;
+
+    }
+
+
+    showPage("game3Page");
+
+}
+
+
+
+/* =====================================================
+   小游戏3
+   它什么时候才真正消失？
+===================================================== */
+
+const timeLabels = [
+
+    "1天",
+    "1个月",
+    "1年",
+    "10年",
+    "50年",
+    "100年",
+    "更久"
+
+];
+
+
+
+experimentData.game3_disappearTime = {
+
+    timePackaging: "1年",
+
+    timePlastic: "1年",
+
+    timePaper: "1年",
+
+    timeAluminum: "1年",
+
+    timeFood: "1年"
+
+};
+
+const game3Touched = {
+
+    timePackaging: false,
+
+    timePlastic: false,
+
+    timePaper: false,
+
+    timeAluminum: false,
+
+    timeFood: false
+
+};
+
+
+
+function updateTime(slider, key) {
+
+    const times = [
+        "1天",
+        "1个月",
+        "1年",
+        "10年",
+        "50年",
+        "100年",
+        "更久"
+    ];
+
+    const value = times[slider.value];
+
+    experimentData.game3_disappearTime[key] = value;
+
+    game3Touched[key] = true;
+
+    document.getElementById(key).textContent = value;
+}
+
+
+
+function finishGame3() {
+
+    const allAnswered =
+        Object.values(game3Touched)
+        .every(value => value === true);
+
+    if (!allAnswered) {
+
+        alert("请为每一项都选择一个时间。");
+
+        return;
+    }
+
+    showPage("q3Page");
+}
+
+
+
+/* =====================================================
+   Q3
+===================================================== */
+
+function selectQ3(element, value) {
+
+    if (element.classList.contains("selected")) {
+
+        element.classList.remove("selected");
+
+
+        experimentData.Q3 =
+            experimentData.Q3.filter(
+                item => item !== value
+            );
+
+    }
+
+    else {
+
+        if (
+            experimentData.Q3.length >= 3
+        ) {
+
+            alert(
+                "最多只能选择 3 个。"
+            );
+
+            return;
+
+        }
+
+
+        element.classList.add("selected");
+
+
+        experimentData.Q3.push(value);
+
+    }
+
+
+    document
+        .getElementById("q3Count")
+        .textContent =
+        experimentData.Q3.length;
+
+
+    document
+        .getElementById("q3Button")
+        .disabled =
+        experimentData.Q3.length !== 3;
+
+}
+
+
+
+/* =====================================================
+   完成实验
+===================================================== */
+
+async function finishQ3() {
+
+    if (experimentData.Q3.length !== 3) {
+
+        alert("请选择 3 个选项。");
+
+        return;
+    }
+
+    const scriptURL =
+        "https://script.google.com/macros/s/AKfycbyhf_sZHmKoZxTZQsTLRD9_QUEYw5WNrtllNlw7bYQi1cv9QHMZMY-xB3_pF62f6MdX/exec";
+
+
+    try {
+
+        await fetch(scriptURL, {
+
+            method: "POST",
+
+            body: JSON.stringify(experimentData)
+
+        });
+
+
+        console.log(
+            "实验数据已经发送：",
+            experimentData
+        );
+
+
+        showPage("completePage");
+
+
+    } catch (error) {
+
+        console.error(
+            "数据发送失败：",
+            error
+        );
+
+        alert(
+            "数据提交失败，请检查网络后重试。"
+        );
+
+    }
+
+}
+
+</script>
+
+
+</body>
+
+</html>
